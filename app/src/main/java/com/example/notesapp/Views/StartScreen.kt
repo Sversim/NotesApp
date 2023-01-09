@@ -1,10 +1,8 @@
 package com.example.notesapp.Views
 
+import android.annotation.SuppressLint
 import android.app.Application
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -33,11 +31,14 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.colorResource
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 
-@OptIn(ExperimentalMaterialApi::class)
+
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel) {
 
@@ -52,6 +53,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
 
     // Основное блок
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
@@ -74,34 +76,37 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
             }
         }
     ) {
-        val pagerState = rememberPagerState()
-        val pages = mutableListOf<>()
+        Column() {
+            val pagerState = rememberPagerState()
+            val pages = viewModel.readAllLists().observeAsState(listOf()).value
+//            val pages = mutableListOf<>()
 
-        TabRow(
-            // Our selected tab is our current page
-            selectedTabIndex = pagerState.currentPage,
-            // Override the indicator, using the provided pagerTabIndicatorOffset modifier
-            indicator = { tabPositions ->
-                TabRowDefaults.Indicator(
-                    Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
-                )
+            TabRow(
+                // Our selected tab is our current page
+                selectedTabIndex = pagerState.currentPage,
+                // Override the indicator, using the provided pagerTabIndicatorOffset modifier
+                indicator = { tabPositions ->
+                    TabRowDefaults.Indicator(
+                        Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+                    )
+                }
+            ) {
+                // Add tabs for all of our pages
+                pages.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = pagerState.currentPage == index,
+                        onClick = { /* TODO */ },
+                    )
+                }
             }
-        ) {
-            // Add tabs for all of our pages
-            pages.forEachIndexed { index, title ->
-                Tab(
-                    text = { Text(title) },
-                    selected = pagerState.currentPage == index,
-                    onClick = { /* TODO */ },
-                )
-            }
-        }
 
-        HorizontalPager(
-            count = pages.size,
-            state = pagerState,
-        ) { page ->
-            // TODO: page content
+            HorizontalPager(
+                count = pages.size,
+                state = pagerState,
+            ) { page ->
+                // TODO: page content
+            }
         }
     }
 
@@ -134,11 +139,18 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             label = { Text(text = stringResource(R.string.new_deskription)) }
                         )
                     }
+
+                    // Нижняя панель кнопок
                     Row(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+
                     ) {
                         Button(
-                            modifier = Modifier.padding(top = 16.dp),
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 isDescShowed = !isDescShowed
@@ -148,7 +160,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         }
 
                         Button(
-                            modifier = Modifier.padding(top = 16.dp),
+                            modifier = Modifier.padding(top = 16.dp).fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 // TODO Выбор даты
@@ -158,7 +170,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         }
 
                         Button(
-                            modifier = Modifier.padding(top = 16.dp),
+                            modifier = Modifier.padding(top = 16.dp).fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 isChoosen = !isChoosen
@@ -174,14 +186,19 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         }
 
                         Button(
-                            modifier = Modifier.padding(top = 16.dp),
+                            modifier = Modifier.padding(top = 16.dp).fillMaxHeight(),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 // TODO viewModel добавить в базу данных
                                 // что-то типа viewModel.initDatabase(TYPE_FIREBASE) {}
                             },
                             enabled = remTitle.isNotEmpty()
                         ) {
-                            Text(text = stringResource(R.string.save))
+                            if (remTitle.isEmpty()) {
+                                Text(text = stringResource(R.string.save), color = colorResource(id = R.color.grey))
+                            } else {
+                                Text(text = stringResource(R.string.save), color = colorResource(id = R.color.purple_200))
+                            }
                         }
                     }
 

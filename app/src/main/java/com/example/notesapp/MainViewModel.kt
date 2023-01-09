@@ -6,6 +6,29 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 class MainViewModel (application: Application) : AndroidViewModel(application) {
+
+    val context = application
+
+    fun initDatabase(type: String, onSuccess: ()-> Unit) {
+//        when(type) {
+//            TYPE_ROOM -> {
+//                val dao = AppRoomDatabase.getInstance(context = context).getRoomDao()
+//                REPOSITORY = RoomRepository(dao)
+//                onSuccess()
+//            }
+//            TYPE_FIREBASE -> {
+//                REPOSITORY = AppFirebaseRepository()
+//                REPOSITORY.connectToDatabase(
+//                    { onSuccess() },
+//                    { Log.d("checkData", "Error: ${it}")}
+//                )
+//            }
+//        }
+    }
+
+    fun readAllLists(): Any {
+
+    }
 }
 
 class MainViewModelFactory(private val application: Application) : ViewModelProvider.NewInstanceFactory() {
