@@ -38,6 +38,7 @@ import androidx.compose.ui.res.colorResource
 @Composable
 fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel) {
 
+    // Переменные заметки
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
     var remTitle by remember { mutableStateOf("") }
@@ -45,6 +46,8 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
     var isDescShowed by remember { mutableStateOf(false) }
     var isChoosen by remember { mutableStateOf(false) }
 
+
+    // Основное блок
     Scaffold(
         topBar = {
             TopAppBar(
@@ -70,6 +73,11 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
     ) {
     }
 
+
+
+
+
+    // Добавление заметки
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
         sheetElevation = 10.dp,
