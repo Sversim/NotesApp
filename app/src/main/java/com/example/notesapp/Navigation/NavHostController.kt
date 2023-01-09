@@ -5,6 +5,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.notesapp.MainViewModel
+import com.example.notesapp.Views.NoteScreen
+import com.example.notesapp.Views.StartScreen
 
 sealed class NavRoute(val route: String) {
     object StartScreen: NavRoute("start_screen");
