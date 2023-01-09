@@ -3,4 +3,5 @@
     <string name="task_title">Задачи</string>
     <string name="new_task">Новая задача</string>
     <string name="new_deskription">Добавьте описание</string>
+    <string name="save">Сохранить</string>
 </resources>

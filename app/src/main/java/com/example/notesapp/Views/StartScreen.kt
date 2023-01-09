@@ -1,12 +1,17 @@
 package com.example.notesapp.Views
 
 import android.app.Application
-import android.provider.Telephony.Carriers.PASSWORD
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +32,7 @@ import com.example.notesapp.ui.theme.NotesAppTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.colorResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -36,6 +42,8 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
     val coroutineScope = rememberCoroutineScope()
     var remTitle by remember { mutableStateOf("") }
     var remDesc by remember { mutableStateOf("") }
+    var isDescShowed by remember { mutableStateOf(false) }
+    var isChoosen by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -79,36 +87,66 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         label = { Text(text = stringResource(R.string.new_task)) },
                         isError = remTitle.isEmpty()
                     )
-                    OutlinedTextField(
-                        value = remDesc,
-                        onValueChange = { remDesc = it },
-                        label = { Text(text = stringResource(R.string.new_deskription)) }
-                    )
-                    Button(
-                        modifier = Modifier.padding(top = 16.dp),
-                        onClick = {
-                            // TODO viewModel добавитьь в базу данных
-                            // что-то типа viewModel.initDatabase(TYPE_FIREBASE) {}
-                        },
-                        enabled = remTitle.isNotEmpty()
-                    ) {
-//                        Text(text = Constants.Keys.SIGN_IN)
+                    if (isDescShowed) {
+                        OutlinedTextField(
+                            value = remDesc,
+                            onValueChange = { remDesc = it },
+                            label = { Text(text = stringResource(R.string.new_deskription)) }
+                        )
                     }
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            modifier = Modifier.padding(top = 16.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                            onClick = {
+                                isDescShowed = !isDescShowed
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Filled.Edit, contentDescription = "")
+                        }
+
+                        Button(
+                            modifier = Modifier.padding(top = 16.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                            onClick = {
+                                // TODO Выбор даты
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Filled.DateRange, contentDescription = "")
+                        }
+
+                        Button(
+                            modifier = Modifier.padding(top = 16.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                            onClick = {
+                                isChoosen = !isChoosen
+                            }
+                        ) {
+                            if (isChoosen) {
+                                Icon(imageVector = Icons.Filled.Star, contentDescription = "", tint = colorResource(
+                                    id = R.color.purple_200
+                                ))
+                            } else {
+                                Icon(imageVector = Icons.Outlined.Star, contentDescription = "")
+                            }
+                        }
+
+                        Button(
+                            modifier = Modifier.padding(top = 16.dp),
+                            onClick = {
+                                // TODO viewModel добавить в базу данных
+                                // что-то типа viewModel.initDatabase(TYPE_FIREBASE) {}
+                            },
+                            enabled = remTitle.isNotEmpty()
+                        ) {
+                            Text(text = stringResource(R.string.save))
+                        }
+                    }
+
                 }
             }
         }
     ) {}
-}
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewStartScreen() {
-    NotesAppTheme() {
-        val context = LocalContext.current
-        val mViewModel: MainViewModel = viewModel(factory = MainViewModelFactory(context.applicationContext as Application))
-        StartScreen(navHostController = rememberNavController(), viewModel = mViewModel)
-    }
 }
