@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.notesapp.Database.Repository
 
 class MainViewModel (application: Application) : AndroidViewModel(application) {
 
@@ -26,9 +27,7 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
 //        }
     }
 
-    fun readAllLists(): Any {
-
-    }
+    fun readAllLists() = Repository.readAll
 }
 
 class MainViewModelFactory(private val application: Application) : ViewModelProvider.NewInstanceFactory() {
