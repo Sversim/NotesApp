@@ -6,7 +6,7 @@ import java.util.*
 
 @Entity
 data class NoteModel (
-    val firebaseId: String,
+    val firebaseId: String = "",
     val title: String = "Test",
     val description: String = "",
     val time: String = SimpleDateFormat("yyyy-MM-dd hh:mm").format(Calendar.getInstance().getTime()),

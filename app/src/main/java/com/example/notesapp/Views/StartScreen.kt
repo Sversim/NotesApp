@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.DpOffset
 import com.example.notesapp.Models.ListModel
+import com.example.notesapp.Models.NoteModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
@@ -261,8 +262,17 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 .fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
-                                // TODO viewModel добавить в базу данных
-                                // что-то типа viewModel.initDatabase(TYPE_FIREBASE) {}
+                                 viewModel.createNote(
+                                     pages[pagerState.currentPage].firebaseId,
+                                     NoteModel(
+                                         title = remTitle,
+                                         description = remDesc,
+                                         // TODO внятное время
+                                         choosen = isChoosen,
+                                         done = false
+                                         // TODO возможно, добавить id родителя
+                                     )
+                                 ) {}
                             },
                             enabled = remTitle.isNotEmpty()
                         ) {

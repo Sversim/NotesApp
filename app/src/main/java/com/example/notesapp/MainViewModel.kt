@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.notesapp.Database.Repository
 import com.example.notesapp.Models.ListModel
+import com.example.notesapp.Models.NoteModel
 import com.example.notesapp.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,6 +51,7 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
         )
     }
 
+    // Lists
     fun readAllLists() = REPOSITORY.readAllLists
 
     fun createList(listModel: ListModel, onSuccess: () -> Unit) {
@@ -75,6 +77,18 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
     fun deleteList(listModel: ListModel, onSuccess: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             REPOSITORY.deleteList(list = listModel) {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+
+    // Notes
+    fun createNote(parent: String, noteModel: NoteModel, onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            REPOSITORY.createNote(parent = parent, noteModel = noteModel) {
                 viewModelScope.launch(Dispatchers.Main) {
                     onSuccess()
                 }
