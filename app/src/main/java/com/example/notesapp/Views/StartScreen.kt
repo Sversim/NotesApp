@@ -192,7 +192,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                     }
                     LazyColumn {
                         items(keys) { note ->
-                            GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
+                            GetCard(noteModel = note, parent = note.parent, navHostController = navHostController, viewModel = viewModel)
                         }
                     }
                 } else {
@@ -297,10 +297,6 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 .fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
-                                remTitle = ""
-                                remDesc = ""
-                                isChoosen = false
-                                isDescShowed = false
                                 coroutineScope.launch {
                                     bottomSheetState.hide()
                                 }
@@ -311,10 +307,15 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                         description = remDesc,
                                         // TODO внятное время
                                         choosen = isChoosen,
-                                        done = false
-                                        // TODO возможно, добавить id родителя
+                                        done = false,
+                                        parent = pages[pagerState.currentPage].firebaseId
                                     )
                                 ) {}
+
+                                remTitle = ""
+                                remDesc = ""
+                                isChoosen = false
+                                isDescShowed = false
                             },
                             enabled = remTitle.isNotEmpty()
                         ) {
@@ -415,7 +416,8 @@ fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navH
                             description = noteModel.description,
                             time = noteModel.time,
                             choosen = remChos,
-                            done = remDone
+                            done = remDone,
+                            parent = noteModel.parent
                         )
                     ) {}
                           },
@@ -449,7 +451,8 @@ fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navH
                             description = noteModel.description,
                             time = noteModel.time,
                             choosen = remChos,
-                            done = remDone
+                            done = remDone,
+                            parent = noteModel.parent
                         )
                     ) {}
                           },
@@ -464,7 +467,5 @@ fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navH
                 }
             }
         }
-
-
     }
 }

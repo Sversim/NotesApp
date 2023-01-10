@@ -63,6 +63,8 @@ class Repository {
         mapNote["time"] = noteModel.time
         mapNote["choosen"] = noteModel.choosen
         mapNote["done"] = noteModel.done
+        mapNote["parent"] = noteModel.parent
+
 
         database.child(mAuth.currentUser?.uid.toString()).child(TABLE_NOTES).child(parent).child(noteId)
             .updateChildren(mapNote)
@@ -79,6 +81,7 @@ class Repository {
         mapNote["time"] = noteModel.time
         mapNote["choosen"] = noteModel.choosen
         mapNote["done"] = noteModel.done
+        mapNote["parent"] = noteModel.parent
 
         database.child(mAuth.currentUser?.uid.toString()).child(TABLE_NOTES).child(parent).child(noteModel.firebaseId)
             .updateChildren(mapNote)

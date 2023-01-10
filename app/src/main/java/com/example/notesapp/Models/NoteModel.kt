@@ -12,5 +12,5 @@ data class NoteModel (
     val time: String = SimpleDateFormat("yyyy-MM-dd hh:mm").format(Calendar.getInstance().getTime()),
     val choosen: Boolean = false,
     val done: Boolean = false,
-//    val parent: String = ""
+    val parent: String = ""
 )
