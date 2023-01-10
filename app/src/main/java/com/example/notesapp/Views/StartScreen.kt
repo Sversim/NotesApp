@@ -1,14 +1,11 @@
 package com.example.notesapp.Views
 
 import android.annotation.SuppressLint
-import android.app.Application
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -16,22 +13,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.notesapp.MainViewModel
-import com.example.notesapp.MainViewModelFactory
 import com.example.notesapp.R
-import com.example.notesapp.ui.theme.NotesAppTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.DpOffset
 import com.example.notesapp.Models.ListModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -52,17 +44,55 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
     var isDescShowed by remember { mutableStateOf(false) }
     var isChoosen by remember { mutableStateOf(false) }
 
+    // Списки во viewPager
+    val pagerState = rememberPagerState()
+    val pages = listOf(ListModel(name = ""), ListModel(name = stringResource(R.string.main_task_list))) +
+            viewModel.readAllLists().observeAsState(listOf()).value
 
-    // Основное блок
+    // Добавление списка
+    var remListTitle by remember { mutableStateOf("") }
+
+
+
+    // Основной блок
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = stringResource(R.string.task_title),
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(R.string.task_title),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        var expanded by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { expanded = true }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "open_menu")
+                            }
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                offset = DpOffset(x = 20.dp, y = 10.dp)
+                            ) {
+                                if (pagerState.currentPage > 1) {
+                                    DropdownMenuItem(onClick = {  }) { Text(stringResource(R.string.rename_list)) }
+                                    DropdownMenuItem(onClick = { }) { Text(stringResource(R.string.delete_list)) }
+                                } else {
+                                    DropdownMenuItem(onClick = {  }) { Text(stringResource(R.string.rename_list), color = colorResource(
+                                        id = R.color.grey)) }
+                                    DropdownMenuItem(onClick = { }) { Text(stringResource(R.string.delete_list), color = colorResource(
+                                        id = R.color.grey)) }
+                                }
+
+                                Divider()
+                                DropdownMenuItem(onClick = {  }) { Text(stringResource(R.string.new_list)) }
+                            }
+                        }
+                    }
                 },
                 backgroundColor = Color.Transparent,
                 elevation = 12.dp
@@ -74,16 +104,15 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                     bottomSheetState.show()
                 }
             }) {
-
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "EditAction",
+                    tint = colorResource(R.color.purple_500)
+                )
             }
         }
     ) {
         Column() {
-            val pagerState = rememberPagerState()
-//            val pages = viewModel.readAllLists().observeAsState(listOf()).value
-
-            val pages = listOf<ListModel>(ListModel(name = "choosen"), ListModel(name = "my tasks")) + viewModel.readAllLists().observeAsState(listOf()).value
-
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 indicator = { tabPositions ->
@@ -92,10 +121,15 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                     )
                 }
             ) {
-                // Add tabs for all of our pages
                 pages.forEachIndexed { index, title ->
                     Tab(
-                        text = { Text(title.name) },
+                        text = {
+                            Text(title.name)
+                            if (title.name == "") {
+                                Icon(imageVector = Icons.Filled.Star, contentDescription = "", tint = colorResource(
+                                    id = R.color.purple_200
+                                ))
+                            } },
                         selected = pagerState.currentPage == index,
                         onClick = { pagerState.currentPage == index },
                     )
@@ -106,6 +140,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                 count = pages.size,
                 state = pagerState,
             ) { page ->
+                Text(text = pagerState.toString())
                 // TODO: page content
             }
         }
@@ -161,7 +196,9 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         }
 
                         Button(
-                            modifier = Modifier.padding(top = 16.dp).fillMaxHeight(),
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 // TODO Выбор даты
@@ -171,7 +208,9 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         }
 
                         Button(
-                            modifier = Modifier.padding(top = 16.dp).fillMaxHeight(),
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 isChoosen = !isChoosen
@@ -187,7 +226,9 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         }
 
                         Button(
-                            modifier = Modifier.padding(top = 16.dp).fillMaxHeight(),
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 // TODO viewModel добавить в базу данных
@@ -200,6 +241,51 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             } else {
                                 Text(text = stringResource(R.string.save), color = colorResource(id = R.color.purple_200))
                             }
+                        }
+                    }
+
+                }
+            }
+        }
+    ) {}
+
+
+    // Добавление списка
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        sheetElevation = 10.dp,
+        sheetShape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
+        sheetContent = {
+            Surface {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(all = 32.dp)
+                ) {
+                    OutlinedTextField(
+                        value = remListTitle,
+                        onValueChange = { remTitle = it },
+                        label = { Text(text = stringResource(R.string.new_list)) },
+                        isError = remListTitle.isEmpty()
+                    )
+
+                    // Сохранение
+                    Button(
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                        onClick = {
+                            // TODO viewModel добавить в базу данных
+                            // что-то типа viewModel.initDatabase(TYPE_FIREBASE) {}
+                        },
+                        enabled = remListTitle.isNotEmpty()
+                    ) {
+                        if (remListTitle.isEmpty()) {
+                            Text(text = stringResource(R.string.save), color = colorResource(id = R.color.grey))
+                        } else {
+                            Text(text = stringResource(R.string.save), color = colorResource(id = R.color.purple_200))
                         }
                     }
 

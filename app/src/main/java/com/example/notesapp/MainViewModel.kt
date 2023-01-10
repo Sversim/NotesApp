@@ -6,8 +6,12 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.example.notesapp.Database.Repository
+import com.example.notesapp.Models.ListModel
 import com.example.notesapp.utils.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainViewModel (application: Application) : AndroidViewModel(application) {
     val context = application
@@ -39,9 +43,6 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
             AUTHOR_PAS = sPreferences.getString(PASSWORD, "")!!;
         }
 
-        Log.d("log", AUTHOR_KEY)
-        Log.d("pas", AUTHOR_PAS)
-
         REPOSITORY = Repository()
         REPOSITORY.connectToDatabase(
             { onSuccess() },
@@ -49,7 +50,37 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun readAllLists() = REPOSITORY.readAll
+    fun readAllLists() = REPOSITORY.readAllLists
+
+    fun createList(listModel: ListModel, onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            REPOSITORY.createList(listModel = listModel) {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun updateList(listModel: ListModel, onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            REPOSITORY.updateList(listModel = listModel) {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun deleteList(listModel: ListModel, onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            REPOSITORY.deleteList(listModel = listModel) {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onSuccess()
+                }
+            }
+        }
+    }
 }
 
 class MainViewModelFactory(private val application: Application) : ViewModelProvider.NewInstanceFactory() {
