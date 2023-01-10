@@ -8,3 +8,5 @@ lateinit var REPOSITORY: Repository
 
 const val AUTHOR = "AUTHOR"
 const val PASSWORD = "PASSWORD"
+const val TABLE_LISTS = "TABLE_LISTS"
+const val TABLE_NOTES = "TABLE_NOTES"

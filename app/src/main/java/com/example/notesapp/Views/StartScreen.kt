@@ -1,11 +1,14 @@
 package com.example.notesapp.Views
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -23,13 +26,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.sp
 import com.example.notesapp.Models.ListModel
 import com.example.notesapp.Models.NoteModel
+import com.example.notesapp.Navigation.NavRoute
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -47,8 +57,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
 
     // Списки во viewPager
     val pagerState = rememberPagerState()
-    val pages = listOf(ListModel(name = ""), ListModel(name = stringResource(R.string.main_task_list))) +
-            viewModel.readAllLists().observeAsState(listOf()).value
+    val pages = listOf(ListModel(name = "")) + viewModel.readAllLists().observeAsState(listOf()).value
 
     // Добавление списка
     val bottomSheetStateForList = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -85,7 +94,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 onDismissRequest = { expanded = false },
                                 offset = DpOffset(x = 20.dp, y = 10.dp)
                             ) {
-                                if (pagerState.currentPage > 1) {
+                                if (pagerState.currentPage > 0) {
                                     DropdownMenuItem(onClick = {
                                         remIsANewList = false
                                         coroutineScope.launch {
@@ -172,7 +181,33 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                 count = pages.size,
                 state = pagerState,
             ) { page ->
+                if (pagerState.currentPage == 0) {
+                    val keys = mutableListOf<NoteModel>()
+                    pages.forEach {
+                        if (it.firebaseId != "") {
+                            keys.addAll(
+                                viewModel.readNotesWithParent(it.firebaseId).observeAsState(listOf()).value.filter { it.choosen }
+                            )
+                        }
+                    }
+                    LazyColumn {
+                        items(keys) { note ->
+                            GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
+                        }
+                    }
+                } else {
+                    val notes = viewModel.readNotesWithParent(pages[pagerState.currentPage].firebaseId).observeAsState(listOf()).value
+                    if (!notes.isNullOrEmpty()) {
+                        LazyColumn {
+                            items(notes) { note ->
+                                GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
+                            }
+                        }
+                    }
+                }
+
                 // TODO: page content
+
             }
         }
     }
@@ -262,17 +297,24 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 .fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
-                                 viewModel.createNote(
-                                     pages[pagerState.currentPage].firebaseId,
-                                     NoteModel(
-                                         title = remTitle,
-                                         description = remDesc,
-                                         // TODO внятное время
-                                         choosen = isChoosen,
-                                         done = false
-                                         // TODO возможно, добавить id родителя
-                                     )
-                                 ) {}
+                                remTitle = ""
+                                remDesc = ""
+                                isChoosen = false
+                                isDescShowed = false
+                                coroutineScope.launch {
+                                    bottomSheetState.hide()
+                                }
+                                viewModel.createNote(
+                                    pages[pagerState.currentPage].firebaseId,
+                                    NoteModel(
+                                        title = remTitle,
+                                        description = remDesc,
+                                        // TODO внятное время
+                                        choosen = isChoosen,
+                                        done = false
+                                        // TODO возможно, добавить id родителя
+                                    )
+                                ) {}
                             },
                             enabled = remTitle.isNotEmpty()
                         ) {
@@ -340,4 +382,89 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
             }
         }
     ) {}
+}
+
+
+@Composable
+fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navHostController: NavHostController) {
+    var remDone by remember { mutableStateOf(noteModel.done) }
+    var remChos by remember { mutableStateOf(noteModel.choosen) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp, horizontal = 5.dp)
+            .clickable {
+                navHostController.navigate(route = NavRoute.NoteScreen.route + "/${noteModel.firebaseId}")
+            },
+        elevation = 10.dp
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = {
+                    remDone = !remDone
+                    viewModel.updateNote(
+                        parent,
+                        NoteModel(
+                            firebaseId = noteModel.firebaseId,
+                            title = noteModel.title,
+                            description = noteModel.description,
+                            time = noteModel.time,
+                            choosen = remChos,
+                            done = remDone
+                        )
+                    ) {}
+                          },
+                modifier = Modifier.padding(end = 20.dp)
+            ) {
+                if (remDone) {
+                    Icon(Icons.Outlined.AddCircle, contentDescription = "open_menu")
+                } else {
+                    Icon(Icons.Filled.AddCircle, contentDescription = "open_menu")
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            )
+            {
+                Text(
+                    text = noteModel.title,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            IconButton(
+                onClick = {
+                    remChos = !remChos
+                    viewModel.updateNote(
+                        parent,
+                        NoteModel(
+                            firebaseId = noteModel.firebaseId,
+                            title = noteModel.title,
+                            description = noteModel.description,
+                            time = noteModel.time,
+                            choosen = remChos,
+                            done = remDone
+                        )
+                    ) {}
+                          },
+                modifier = Modifier.padding(end = 20.dp)
+            ) {
+                if (remChos) {
+                    Icon(Icons.Outlined.Star, contentDescription = "open_menu", tint = colorResource(
+                        id = R.color.purple_200
+                    ))
+                } else {
+                    Icon(Icons.Filled.Star, contentDescription = "open_menu")
+                }
+            }
+        }
+
+
+    }
 }

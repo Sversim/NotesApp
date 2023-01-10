@@ -86,9 +86,31 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
 
 
     // Notes
+    fun readNotesWithParent(parent: String) = REPOSITORY.readAllNotes(parent)
+
     fun createNote(parent: String, noteModel: NoteModel, onSuccess: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             REPOSITORY.createNote(parent = parent, noteModel = noteModel) {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun updateNote(parent: String, noteModel: NoteModel, onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            REPOSITORY.updateNote(parent = parent, noteModel = noteModel) {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun deleteNote(parent: String, noteModel: NoteModel, onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            REPOSITORY.deleteNote(parent = parent, noteModel = noteModel) {
                 viewModelScope.launch(Dispatchers.Main) {
                     onSuccess()
                 }

@@ -6,6 +6,8 @@ import com.example.notesapp.Models.ListModel
 import com.example.notesapp.Models.NoteModel
 import com.example.notesapp.utils.AUTHOR_KEY
 import com.example.notesapp.utils.AUTHOR_PAS
+import com.example.notesapp.utils.TABLE_LISTS
+import com.example.notesapp.utils.TABLE_NOTES
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -24,7 +26,7 @@ class Repository {
 
         mapList["firebaseId"] = listId
         mapList["name"] = listModel.name
-        database.child(mAuth.currentUser?.uid.toString()).child(listId)
+        database.child(mAuth.currentUser?.uid.toString()).child(TABLE_LISTS).child(listId)
             .updateChildren(mapList)
             .addOnSuccessListener {onSuccess()}
             .addOnFailureListener { Log.d("create", "Creation failure") }
@@ -35,16 +37,14 @@ class Repository {
 
         mapList["firebaseId"] = listModel.firebaseId
         mapList["name"] = listModel.name
-        database.child(mAuth.currentUser?.uid.toString()).child(listModel.firebaseId)
+        database.child(mAuth.currentUser?.uid.toString()).child(TABLE_LISTS).child(listModel.firebaseId)
             .updateChildren(mapList)
             .addOnSuccessListener {onSuccess()}
             .addOnFailureListener { Log.d("create", "Creation failure") }
     }
 
     fun deleteList(list: ListModel, onSuccess: ()-> Unit) {
-        Log.d("onDeleteUser", mAuth.currentUser?.uid.toString())
-        Log.d("onDeleteNote", list.firebaseId)
-        database.child(mAuth.currentUser?.uid.toString()).child(list.firebaseId).removeValue()
+        database.child(mAuth.currentUser?.uid.toString()).child(TABLE_LISTS).child(list.firebaseId).removeValue()
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { Log.d("checkData", "Failed to delete note") }
     }
@@ -64,29 +64,33 @@ class Repository {
         mapNote["choosen"] = noteModel.choosen
         mapNote["done"] = noteModel.done
 
-        database.child(mAuth.currentUser?.uid.toString()).child(parent).child(noteId)
+        database.child(mAuth.currentUser?.uid.toString()).child(TABLE_NOTES).child(parent).child(noteId)
             .updateChildren(mapNote)
             .addOnSuccessListener {onSuccess()}
             .addOnFailureListener { Log.d("create", "Creation failure") }
     }
 
     fun updateNote(parent: String, noteModel: NoteModel, onSuccess: ()-> Unit) {
-//        val mapList = hashMapOf<String, Any?>()
-//
-//        mapList["firebaseId"] = listModel.firebaseId
-//        mapList["name"] = listModel.name
-//        database.child(mAuth.currentUser?.uid.toString()).child(listModel.firebaseId)
-//            .updateChildren(mapList)
-//            .addOnSuccessListener {onSuccess()}
-//            .addOnFailureListener { Log.d("create", "Creation failure") }
+        val mapNote = hashMapOf<String, Any?>()
+
+        mapNote["firebaseId"] = noteModel.firebaseId
+        mapNote["title"] = noteModel.title
+        mapNote["description"] = noteModel.description
+        mapNote["time"] = noteModel.time
+        mapNote["choosen"] = noteModel.choosen
+        mapNote["done"] = noteModel.done
+
+        database.child(mAuth.currentUser?.uid.toString()).child(TABLE_NOTES).child(parent).child(noteModel.firebaseId)
+            .updateChildren(mapNote)
+            .addOnSuccessListener {onSuccess()}
+            .addOnFailureListener { Log.d("update", "Updating failure") }
     }
 
-    fun deleteNote(noteModel: NoteModel, onSuccess: ()-> Unit) {
-//        Log.d("onDeleteUser", mAuth.currentUser?.uid.toString())
-//        Log.d("onDeleteNote", list.firebaseId)
-//        database.child(mAuth.currentUser?.uid.toString()).child(list.firebaseId).removeValue()
-//            .addOnSuccessListener { onSuccess() }
-//            .addOnFailureListener { Log.d("checkData", "Failed to delete note") }
+    fun deleteNote(parent: String, noteModel: NoteModel, onSuccess: ()-> Unit) {
+        database.child(mAuth.currentUser?.uid.toString()).child(TABLE_NOTES).child(parent).child(noteModel.firebaseId)
+            .removeValue()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { Log.d("checkData", "Failed to delete note") }
     }
 
 
