@@ -7,9 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.notesapp.Database.Repository
-import com.example.notesapp.utils.AUTHOR
-import com.example.notesapp.utils.AUTHOR_KEY
-import com.example.notesapp.utils.REPOSITORY
+import com.example.notesapp.utils.*
 
 class MainViewModel (application: Application) : AndroidViewModel(application) {
     val context = application
@@ -18,16 +16,31 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
 
     fun initDatabase(onSuccess: ()-> Unit) {
         if (sPreferences.getString(AUTHOR, "").isNullOrEmpty()) {
-            val charset = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+            val charset = ('a'..'z') + ('A'..'Z')
             AUTHOR_KEY = (1..10)
                         .map { charset.random() }
-                    .joinToString("")
+                    .joinToString("") + "@mail.ru"
             sPreferences.edit()
                 .putString(AUTHOR, AUTHOR_KEY)
                 .apply()
         } else {
             AUTHOR_KEY = sPreferences.getString(AUTHOR, "")!!;
         }
+
+        if (sPreferences.getString(PASSWORD, "").isNullOrEmpty()) {
+            val charset = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+            AUTHOR_PAS = (1..6)
+                .map { charset.random() }
+                .joinToString("")
+            sPreferences.edit()
+                .putString(PASSWORD, AUTHOR_PAS)
+                .apply()
+        } else {
+            AUTHOR_PAS = sPreferences.getString(PASSWORD, "")!!;
+        }
+
+        Log.d("log", AUTHOR_KEY)
+        Log.d("pas", AUTHOR_PAS)
 
         REPOSITORY = Repository()
         REPOSITORY.connectToDatabase(

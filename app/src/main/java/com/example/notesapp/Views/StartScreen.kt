@@ -80,34 +80,33 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
         Column() {
             val pagerState = rememberPagerState()
             val pages = viewModel.readAllLists().observeAsState(listOf()).value
-//            val pages = mutableListOf<>()
 
-            TabRow(
-                // Our selected tab is our current page
-                selectedTabIndex = pagerState.currentPage,
-                // Override the indicator, using the provided pagerTabIndicatorOffset modifier
-                indicator = { tabPositions ->
-                    TabRowDefaults.Indicator(
-                        Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
-                    )
-                }
-            ) {
-                // Add tabs for all of our pages
-                pages.forEachIndexed { index, title ->
-                    Tab(
-                        text = { Text(title.name) },
-                        selected = pagerState.currentPage == index,
-                        onClick = { /* TODO */ },
-                    )
-                }
-            }
-
-            HorizontalPager(
-                count = pages.size,
-                state = pagerState,
-            ) { page ->
-                // TODO: page content
-            }
+//            TabRow(
+//                // Our selected tab is our current page
+//                selectedTabIndex = pagerState.currentPage,
+//                // Override the indicator, using the provided pagerTabIndicatorOffset modifier
+//                indicator = { tabPositions ->
+//                    TabRowDefaults.Indicator(
+//                        Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+//                    )
+//                }
+//            ) {
+//                // Add tabs for all of our pages
+//                pages.forEachIndexed { index, title ->
+//                    Tab(
+//                        text = { Text(title.name) },
+//                        selected = pagerState.currentPage == index,
+//                        onClick = { /* TODO */ },
+//                    )
+//                }
+//            }
+//
+//            HorizontalPager(
+//                count = pages.size,
+//                state = pagerState,
+//            ) { page ->
+//                // TODO: page content
+//            }
         }
     }
 
