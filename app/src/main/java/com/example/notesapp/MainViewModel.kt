@@ -74,7 +74,7 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
 
     fun deleteList(listModel: ListModel, onSuccess: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            REPOSITORY.deleteList(listModel = listModel) {
+            REPOSITORY.deleteList(list = listModel) {
                 viewModelScope.launch(Dispatchers.Main) {
                     onSuccess()
                 }

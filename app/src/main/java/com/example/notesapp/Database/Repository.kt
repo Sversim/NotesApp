@@ -22,7 +22,7 @@ class Repository {
 
         mapList["firebaseId"] = listId
         mapList["name"] = listModel.name
-        database.child(mAuth.currentUser?.uid.toString())
+        database.child(mAuth.currentUser?.uid.toString()).child(listId)
             .updateChildren(mapList)
             .addOnSuccessListener {onSuccess()}
             .addOnFailureListener { Log.d("create", "Creation failure") }
@@ -33,7 +33,7 @@ class Repository {
 
         mapList["firebaseId"] = listModel.firebaseId
         mapList["name"] = listModel.name
-        database.child(mAuth.currentUser?.uid.toString())
+        database.child(mAuth.currentUser?.uid.toString()).child(listModel.firebaseId)
             .updateChildren(mapList)
             .addOnSuccessListener {onSuccess()}
             .addOnFailureListener { Log.d("create", "Creation failure") }

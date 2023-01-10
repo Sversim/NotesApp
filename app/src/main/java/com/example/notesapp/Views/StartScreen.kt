@@ -50,6 +50,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
             viewModel.readAllLists().observeAsState(listOf()).value
 
     // Добавление списка
+    val bottomSheetStateForList = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var remListTitle by remember { mutableStateOf("") }
 
 
@@ -70,9 +71,14 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         )
                         var expanded by remember { mutableStateOf(false) }
                         Box {
-                            IconButton(onClick = { expanded = true }) {
+                            IconButton(
+                                onClick = { expanded = true },
+                                modifier = Modifier.padding(end = 20.dp)
+                            ) {
                                 Icon(Icons.Default.MoreVert, contentDescription = "open_menu")
                             }
+
+                            // Выпадающий список настроек
                             DropdownMenu(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false },
@@ -89,7 +95,12 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 }
 
                                 Divider()
-                                DropdownMenuItem(onClick = {  }) { Text(stringResource(R.string.new_list)) }
+                                DropdownMenuItem(onClick = {
+                                    expanded = false
+                                    coroutineScope.launch {
+                                        bottomSheetStateForList.show()
+                                    }
+                                }) { Text(stringResource(R.string.new_list)) }
                             }
                         }
                     }
@@ -252,7 +263,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
 
     // Добавление списка
     ModalBottomSheetLayout(
-        sheetState = bottomSheetState,
+        sheetState = bottomSheetStateForList,
         sheetElevation = 10.dp,
         sheetShape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
         sheetContent = {
@@ -264,7 +275,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                 ) {
                     OutlinedTextField(
                         value = remListTitle,
-                        onValueChange = { remTitle = it },
+                        onValueChange = { remListTitle = it },
                         label = { Text(text = stringResource(R.string.new_list)) },
                         isError = remListTitle.isEmpty()
                     )
@@ -277,8 +288,11 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             .height(50.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                         onClick = {
-                            // TODO viewModel добавить в базу данных
-                            // что-то типа viewModel.initDatabase(TYPE_FIREBASE) {}
+                            viewModel.createList(ListModel(name = remListTitle)) {}
+                            remListTitle = ""
+                            coroutineScope.launch {
+                                bottomSheetStateForList.hide()
+                            }
                         },
                         enabled = remListTitle.isNotEmpty()
                     ) {
