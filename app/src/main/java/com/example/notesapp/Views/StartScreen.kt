@@ -29,6 +29,7 @@ import com.example.notesapp.R
 import com.example.notesapp.ui.theme.NotesAppTheme
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.colorResource
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -94,7 +95,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                 // Add tabs for all of our pages
                 pages.forEachIndexed { index, title ->
                     Tab(
-                        text = { Text(title) },
+                        text = { Text(title.name) },
                         selected = pagerState.currentPage == index,
                         onClick = { /* TODO */ },
                     )

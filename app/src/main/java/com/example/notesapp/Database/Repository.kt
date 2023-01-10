@@ -5,8 +5,7 @@ import com.example.notesapp.Models.ListModel
 
 class Repository {
     val readAll: LiveData<List<ListModel>>
-        get() = LiveData<List<ListModel>>()
-        //TODO("Not yet implemented")
+        get() = AllListsLiveData()
 
     suspend fun create(list: ListModel, onSuccess: ()-> Unit) {
         TODO("Not yet implemented")
