@@ -40,7 +40,9 @@ class Repository {
     }
 
     fun deleteList(list: ListModel, onSuccess: ()-> Unit) {
-        database.child(list.firebaseId).removeValue()
+        Log.d("onDeleteUser", mAuth.currentUser?.uid.toString())
+        Log.d("onDeleteNote", list.firebaseId)
+        database.child(mAuth.currentUser?.uid.toString()).child(list.firebaseId).removeValue()
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { Log.d("checkData", "Failed to delete note") }
     }

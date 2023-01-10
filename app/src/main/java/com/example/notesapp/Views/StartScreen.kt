@@ -52,6 +52,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
     // Добавление списка
     val bottomSheetStateForList = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var remListTitle by remember { mutableStateOf("") }
+    var remIsANewList by remember { mutableStateOf(true) }
 
 
 
@@ -85,9 +86,22 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 offset = DpOffset(x = 20.dp, y = 10.dp)
                             ) {
                                 if (pagerState.currentPage > 1) {
-                                    DropdownMenuItem(onClick = {  }) { Text(stringResource(R.string.rename_list)) }
-                                    DropdownMenuItem(onClick = { }) { Text(stringResource(R.string.delete_list)) }
+                                    DropdownMenuItem(onClick = {
+                                        remIsANewList = false
+                                        coroutineScope.launch {
+                                            remListTitle = pages[pagerState.currentPage].name
+                                            bottomSheetStateForList.show()
+                                        }
+                                    }) { Text(stringResource(R.string.rename_list)) }
+
+                                    DropdownMenuItem(onClick = {
+                                        coroutineScope.launch {
+                                            pagerState.scrollToPage(pagerState.currentPage - 1)
+                                            viewModel.deleteList(pages[pagerState.currentPage + 1]) {}
+                                        }
+                                    }) { Text(stringResource(R.string.delete_list)) }
                                 } else {
+                                    // Фальшивые кнопки
                                     DropdownMenuItem(onClick = {  }) { Text(stringResource(R.string.rename_list), color = colorResource(
                                         id = R.color.grey)) }
                                     DropdownMenuItem(onClick = { }) { Text(stringResource(R.string.delete_list), color = colorResource(
@@ -97,6 +111,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 Divider()
                                 DropdownMenuItem(onClick = {
                                     expanded = false
+                                    remIsANewList = true
                                     coroutineScope.launch {
                                         bottomSheetStateForList.show()
                                     }
@@ -142,7 +157,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 ))
                             } },
                         selected = pagerState.currentPage == index,
-                        onClick = { pagerState.currentPage == index },
+                        onClick = { },
                     )
                 }
             }
@@ -151,7 +166,6 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                 count = pages.size,
                 state = pagerState,
             ) { page ->
-                Text(text = pagerState.toString())
                 // TODO: page content
             }
         }
@@ -288,7 +302,11 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             .height(50.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                         onClick = {
-                            viewModel.createList(ListModel(name = remListTitle)) {}
+                            if (remIsANewList) {
+                                viewModel.createList(ListModel(name = remListTitle)) {}
+                            } else {
+                                viewModel.updateList(ListModel(firebaseId = pages[pagerState.currentPage].firebaseId, name = remListTitle)) {}
+                            }
                             remListTitle = ""
                             coroutineScope.launch {
                                 bottomSheetStateForList.hide()
