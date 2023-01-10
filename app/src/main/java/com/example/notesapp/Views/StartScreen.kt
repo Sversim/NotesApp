@@ -68,7 +68,6 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                     ) {
                         Text(
                             text = stringResource(R.string.task_title),
-                            modifier = Modifier.fillMaxWidth()
                         )
                         var expanded by remember { mutableStateOf(false) }
                         Box {
@@ -139,6 +138,8 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
         }
     ) {
         Column() {
+
+            // ViewPager
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 indicator = { tabPositions ->
@@ -157,7 +158,11 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 ))
                             } },
                         selected = pagerState.currentPage == index,
-                        onClick = { },
+                        onClick = {
+                              coroutineScope.launch {
+                                  pagerState.scrollToPage(index)
+                              }
+                        },
                     )
                 }
             }
