@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.colorResource
+import com.example.notesapp.Models.ListModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
@@ -79,34 +80,34 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
     ) {
         Column() {
             val pagerState = rememberPagerState()
-            val pages = viewModel.readAllLists().observeAsState(listOf()).value
+//            val pages = viewModel.readAllLists().observeAsState(listOf()).value
 
-//            TabRow(
-//                // Our selected tab is our current page
-//                selectedTabIndex = pagerState.currentPage,
-//                // Override the indicator, using the provided pagerTabIndicatorOffset modifier
-//                indicator = { tabPositions ->
-//                    TabRowDefaults.Indicator(
-//                        Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
-//                    )
-//                }
-//            ) {
-//                // Add tabs for all of our pages
-//                pages.forEachIndexed { index, title ->
-//                    Tab(
-//                        text = { Text(title.name) },
-//                        selected = pagerState.currentPage == index,
-//                        onClick = { /* TODO */ },
-//                    )
-//                }
-//            }
-//
-//            HorizontalPager(
-//                count = pages.size,
-//                state = pagerState,
-//            ) { page ->
-//                // TODO: page content
-//            }
+            val pages = listOf<ListModel>(ListModel(name = "choosen"), ListModel(name = "my tasks")) + viewModel.readAllLists().observeAsState(listOf()).value
+
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                indicator = { tabPositions ->
+                    TabRowDefaults.Indicator(
+                        Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+                    )
+                }
+            ) {
+                // Add tabs for all of our pages
+                pages.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title.name) },
+                        selected = pagerState.currentPage == index,
+                        onClick = { pagerState.currentPage == index },
+                    )
+                }
+            }
+
+            HorizontalPager(
+                count = pages.size,
+                state = pagerState,
+            ) { page ->
+                // TODO: page content
+            }
         }
     }
 
