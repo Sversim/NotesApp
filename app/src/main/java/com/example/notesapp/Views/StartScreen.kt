@@ -196,7 +196,10 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             }
                         }
                         LazyColumn {
-                            items(keys) { note ->
+                            items(keys.filter { !it.done }) { note ->
+                                GetCard(noteModel = note, parent = note.parent, navHostController = navHostController, viewModel = viewModel)
+                            }
+                            items(keys.filter { it.done }) { note ->
                                 GetCard(noteModel = note, parent = note.parent, navHostController = navHostController, viewModel = viewModel)
                             }
                         }
@@ -204,9 +207,14 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         val notes = viewModel.readNotesWithParent(pages[pagerState.currentPage].firebaseId).observeAsState(listOf()).value
                         if (!notes.isNullOrEmpty()) {
                             LazyColumn {
-                                items(notes) { note ->
+                                items(notes.sortedBy { it.done }) { note ->
                                     GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
                                 }
+//                                listOf(false, true).forEach { bool->
+//                                    items(notes.filter { it.done == bool }) { note ->
+//                                        GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
+//                                    }
+//                                }
                             }
                         }
                     }
@@ -400,8 +408,8 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
 
 @Composable
 fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navHostController: NavHostController) {
-    var remDone by remember { mutableStateOf(noteModel.done) }
-    var remChos by remember { mutableStateOf(noteModel.choosen) }
+    var remDone = noteModel.done
+    var remChos = noteModel.choosen
 
     Card(
         modifier = Modifier
