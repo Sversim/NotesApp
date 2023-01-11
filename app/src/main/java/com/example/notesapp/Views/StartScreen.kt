@@ -43,6 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import com.example.notesapp.Views.SubView.DatePicker
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -344,7 +347,10 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
 
     if (isDatePickerShowed) {
         DatePicker(onDateSelected = {
-            remTime = it.time.toString()
+            val localDate: LocalDate = Instant.ofEpochMilli(it.time).atZone(ZoneId.systemDefault()).toLocalDate()
+            remTime = localDate.toString()
+
+            Log.d("myTime", localDate.toString())
         }, onDismissRequest = {
             isDatePickerShowed = false
         })

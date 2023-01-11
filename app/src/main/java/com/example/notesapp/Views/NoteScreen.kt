@@ -1,5 +1,6 @@
 package com.example.notesapp.Views
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +30,10 @@ import com.example.notesapp.MainViewModel
 import com.example.notesapp.Models.NoteModel
 import com.example.notesapp.Navigation.NavRoute
 import com.example.notesapp.R
+import com.example.notesapp.Views.SubView.DatePicker
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 
 @Composable
@@ -43,6 +48,8 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
     var remTime by remember { mutableStateOf(note.time) }
     var remChoosen by remember { mutableStateOf(note.choosen) }
     var remDone by remember { mutableStateOf(note.done) }
+
+    var isDatePickerShowed by remember { mutableStateOf(false) }
 
     val subnotes = viewModel.readNotesWithParent(note.firebaseId).observeAsState(listOf()).value
 
@@ -205,26 +212,18 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
                     .fillMaxWidth()
                     .padding(start = 10.dp)
                     .clickable {
-                        // TODO выбор времени
+                        isDatePickerShowed = true
                     },
                 verticalAlignment = Alignment.CenterVertically
                 ) {
                 Icon(Icons.Filled.DateRange, contentDescription = "add_a_description")
-                TextField(
-                    value = if (remTime.isEmpty()) {
+                Text(
+                    modifier = Modifier.padding(start = 10.dp),
+                    text = if (remTime.isEmpty()) {
                         stringResource(id = R.string.add_time)
                     } else {
                         remTime
-                    },
-                    colors = TextFieldDefaults.textFieldColors(
-                        disabledTextColor = Color.Transparent,
-                        backgroundColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent
-                    ),
-                    readOnly = true,
-                    onValueChange = {}
+                    }
                 )
             }
 
@@ -257,12 +256,36 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
                         modifier = Modifier
                             .clickable {
                                 viewModel.createNote(note.firebaseId, NoteModel(title = "", parent = note.firebaseId, time = "")) {}
-                            },
+                            }
+                            .padding(start = 10.dp),
+
                         text = stringResource(id = R.string.add_subtask),
                     )
                 }
             }
         }
+    }
+
+    if (isDatePickerShowed) {
+        DatePicker(onDateSelected = {
+            val localDate: LocalDate = Instant.ofEpochMilli(it.time).atZone(ZoneId.systemDefault()).toLocalDate()
+            remTime = localDate.toString()
+            viewModel.updateNote(
+                note.parent,
+                NoteModel(
+                    firebaseId = note.firebaseId,
+                    title = note.title,
+                    description = note.description,
+                    time = remTime,
+                    choosen = note.choosen,
+                    done = note.done,
+                    parent = note.parent
+                )
+            ) {}
+            Log.d("myTime", localDate.toString())
+        }, onDismissRequest = {
+            isDatePickerShowed = false
+        })
     }
 }
 

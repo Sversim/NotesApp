@@ -1,12 +1,11 @@
 package com.example.notesapp.Views.SubView
 
-import android.text.format.DateFormat
 import android.widget.CalendarView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +36,7 @@ fun DatePicker(
         Column(
             modifier = Modifier
                 .wrapContentSize()
-                .background(color = colorResource(id = R.color.black))
+                .background(color = colorResource(id = R.color.very_dark_grey))
         ) {
             CustomCalendarView(
                 minDate,
@@ -55,17 +54,16 @@ fun DatePicker(
                     .align(Alignment.End)
                     .padding(bottom = 16.dp, end = 16.dp)
             ) {
-                Button(
-                    onClick = onDismissRequest,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                IconButton(
+                    onClick = onDismissRequest
                 ) {
                     Text(
                         text = stringResource(R.string.reject_title),
-                        color = colorResource(R.color.grey)
+                        color = colorResource(R.color.white)
                     )
                 }
 
-                Button(
+                IconButton(
                     onClick = {
                         val newDate = selDate.value
                         onDateSelected(
@@ -78,7 +76,6 @@ fun DatePicker(
                         )
                         onDismissRequest()
                     },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent, ),
                 ) {
                     Text(
                         text = stringResource(R.string.admit_title),
@@ -98,11 +95,19 @@ private fun CustomCalendarView(
     onDateSelected: (Date) -> Unit
 ) {
     AndroidView(
-        modifier = Modifier.wrapContentSize(),
+        modifier = Modifier
+            .wrapContentSize()
+            .background(
+                color = colorResource(id = R.color.very_dark_grey)
+            ),
         factory = { context ->
             CalendarView(context)
         },
         update = { view ->
+            view.dateTextAppearance = R.style.CalenderViewDateCustomText
+            view.firstDayOfWeek = R.style.CalenderViewDateCustomText
+            view.weekDayTextAppearance = R.style.CalenderViewDateCustomText
+
             if (minDate != null)
                 view.minDate = minDate
             if (maxDate != null)
