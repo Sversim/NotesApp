@@ -64,7 +64,7 @@ class Repository {
         mapNote["time"] = noteModel.time
         mapNote["choosen"] = noteModel.choosen
         mapNote["done"] = noteModel.done
-        mapNote["parent"] = noteModel.parent
+        mapNote["parent"] = parent
 
 
         database.child(mAuth.currentUser?.uid.toString()).child(TABLE_NOTES).child(parent).child(noteId)

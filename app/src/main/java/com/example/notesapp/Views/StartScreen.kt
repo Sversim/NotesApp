@@ -318,7 +318,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                         time = remTime,
                                         choosen = isChoosen,
                                         done = false,
-                                        parent = pages[pagerState.currentPage].firebaseId
+                                        parent = pages[if (pagerState.currentPage == 0 ) { 1 } else { pagerState.currentPage }].firebaseId
                                     )
                                 ) {}
 

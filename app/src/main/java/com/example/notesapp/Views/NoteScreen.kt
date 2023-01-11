@@ -249,25 +249,16 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
                 ) {
                     LazyColumn {
                         items(subnotes.sortedBy { it.done }) { note ->
-                            GetSubCard(noteModel = note, parent = note.firebaseId, viewModel = viewModel)
+                            GetSubCard(noteModel = note, viewModel = viewModel)
                         }
                     }
-                    TextField(
+                    Spacer(modifier = Modifier.padding(start = 10.dp, top = 10.dp))
+                    Text(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .clickable {
-                                viewModel.createNote(note.firebaseId, NoteModel(title = "")) {}
+                                viewModel.createNote(note.firebaseId, NoteModel(title = "", parent = note.firebaseId, time = "")) {}
                             },
-                        value = stringResource(id = R.string.add_subtask),
-                        colors = TextFieldDefaults.textFieldColors(
-                            disabledTextColor = Color.Transparent,
-                            backgroundColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
-                        ),
-                        readOnly = true,
-                        onValueChange = {}
+                        text = stringResource(id = R.string.add_subtask),
                     )
                 }
             }
@@ -277,24 +268,21 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
 
 
 @Composable
-fun GetSubCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel) {
+fun GetSubCard(noteModel: NoteModel, viewModel: MainViewModel) {
     var remDone = noteModel.done
     var remChos = noteModel.choosen
 
     var remTitle by remember { mutableStateOf(noteModel.title) }
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp, horizontal = 5.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             onClick = {
                 remDone = !remDone
                 viewModel.updateNote(
-                    parent,
+                    noteModel.parent,
                     NoteModel(
                         firebaseId = noteModel.firebaseId,
                         title = noteModel.title,
@@ -306,7 +294,6 @@ fun GetSubCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel) {
                     )
                 ) {}
             },
-            modifier = Modifier.padding(end = 20.dp)
         ) {
             val iconId = if (remDone) {
                 R.drawable.ic_baseline_lens_24
@@ -321,11 +308,10 @@ fun GetSubCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel) {
 
 
         TextField(
-            value = if (remTitle.isEmpty()) {
-                stringResource(id = R.string.add_name)
-            } else {
-                remTitle
-            },
+            modifier = Modifier.width(220.dp),
+            value = remTitle,
+            placeholder = { Text(stringResource(id = R.string.add_name)) },
+            singleLine = true,
             colors = TextFieldDefaults.textFieldColors(
                 disabledTextColor = Color.Transparent,
                 backgroundColor = Color.Transparent,
@@ -336,7 +322,7 @@ fun GetSubCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel) {
             onValueChange = {
                 remTitle = it
                 viewModel.updateNote(
-                    parent,
+                    noteModel.parent,
                     NoteModel(
                         firebaseId = noteModel.firebaseId,
                         title = remTitle,
@@ -355,7 +341,7 @@ fun GetSubCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel) {
             onClick = {
                 remChos = !remChos
                 viewModel.updateNote(
-                    parent,
+                    noteModel.parent,
                     NoteModel(
                         firebaseId = noteModel.firebaseId,
                         title = noteModel.title,
@@ -380,9 +366,8 @@ fun GetSubCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel) {
         IconButton(
             onClick = {
                 remChos = !remChos
-                viewModel.deleteNote(parent, noteModel) {}
+                viewModel.deleteNote(noteModel.parent, noteModel) {}
             },
-//            modifier = Modifier.padding(end = 20.dp)
         ) {
             Icon(painterResource(R.drawable.ic_round_close_24), contentDescription = "delete", tint = colorResource(
                     id = R.color.purple_200))
