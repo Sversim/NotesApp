@@ -1,20 +1,28 @@
 package com.example.notesapp.Views
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.notesapp.MainViewModel
@@ -25,17 +33,18 @@ import com.example.notesapp.R
 
 @Composable
 fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, parentId: String?, noteId: String?) {
-    val note = viewModel.readNotesWithParent(parentId!!).observeAsState(listOf()).value.firstOrNull()
+    val note = viewModel.readNotesWithParent(parentId!!).observeAsState(listOf()).value.firstOrNull({it.firebaseId == noteId})
     if (note == null) {
         return
     }
 
-//    val note = viewModel.readNotesWithParent(parentId).observeAsState(listOf()).value.first()
     var remTitle by remember { mutableStateOf(note.title) }
     var remDesc by remember { mutableStateOf(note.description) }
     var remTime by remember { mutableStateOf(note.time) }
     var remChoosen by remember { mutableStateOf(note.choosen) }
     var remDone by remember { mutableStateOf(note.done) }
+
+    val subnotes = viewModel.readNotesWithParent(note.firebaseId).observeAsState(listOf()).value
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -127,6 +136,13 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
                 modifier = Modifier.fillMaxWidth(),
                 value = remTitle,
                 textStyle = TextStyle.Default.copy(fontSize = 28.sp),
+                colors = TextFieldDefaults.textFieldColors(
+                    disabledTextColor = Color.Transparent,
+                    backgroundColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
                 onValueChange = {
                     remTitle = it
                     if (!remTitle.isEmpty()) {
@@ -145,16 +161,21 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
                     }
                 }
             )
+
+            Spacer(modifier = Modifier.height(10.dp))
             
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
-                onClick = { /*TODO Добавить описание*/ }) {
+            
+            // Добавить описание
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+                ) {
                 Icon(Icons.Filled.Edit, contentDescription = "add_a_description")
                 TextField(
                     value = remDesc,
                     colors = TextFieldDefaults.textFieldColors(
-//                        textColor = Color.Gray,
                         disabledTextColor = Color.Transparent,
                         backgroundColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
@@ -177,6 +198,194 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
                         ) {}
                     })
             }
+
+            // Добавить время
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp)
+                    .clickable {
+                        // TODO выбор времени
+                    },
+                verticalAlignment = Alignment.CenterVertically
+                ) {
+                Icon(Icons.Filled.DateRange, contentDescription = "add_a_description")
+                TextField(
+                    value = if (remTime.isEmpty()) {
+                        stringResource(id = R.string.add_time)
+                    } else {
+                        remTime
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        disabledTextColor = Color.Transparent,
+                        backgroundColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    ),
+                    readOnly = true,
+                    onValueChange = {}
+                )
+            }
+
+//            Добавить подзадачу
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(
+                    modifier = Modifier.padding(top = 10.dp)
+                ) {
+                    Icon(
+                        painterResource(id = R.drawable.ic_round_subdirectory_arrow_right_24),
+                        contentDescription = "add_a_description"
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    LazyColumn {
+                        items(subnotes.sortedBy { it.done }) { note ->
+                            GetSubCard(noteModel = note, parent = note.firebaseId, viewModel = viewModel)
+                        }
+                    }
+                    TextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                viewModel.createNote(note.firebaseId, NoteModel(title = "")) {}
+                            },
+                        value = stringResource(id = R.string.add_subtask),
+                        colors = TextFieldDefaults.textFieldColors(
+                            disabledTextColor = Color.Transparent,
+                            backgroundColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent
+                        ),
+                        readOnly = true,
+                        onValueChange = {}
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun GetSubCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel) {
+    var remDone = noteModel.done
+    var remChos = noteModel.choosen
+
+    var remTitle by remember { mutableStateOf(noteModel.title) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp, horizontal = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = {
+                remDone = !remDone
+                viewModel.updateNote(
+                    parent,
+                    NoteModel(
+                        firebaseId = noteModel.firebaseId,
+                        title = noteModel.title,
+                        description = noteModel.description,
+                        time = noteModel.time,
+                        choosen = remChos,
+                        done = remDone,
+                        parent = noteModel.parent
+                    )
+                ) {}
+            },
+            modifier = Modifier.padding(end = 20.dp)
+        ) {
+            val iconId = if (remDone) {
+                R.drawable.ic_baseline_lens_24
+            } else {
+                R.drawable.ic_outline_lens_24
+            }
+            Icon(
+                painterResource(id = (iconId)),
+                contentDescription = "open_menu"
+            )
+        }
+
+
+        TextField(
+            value = if (remTitle.isEmpty()) {
+                stringResource(id = R.string.add_name)
+            } else {
+                remTitle
+            },
+            colors = TextFieldDefaults.textFieldColors(
+                disabledTextColor = Color.Transparent,
+                backgroundColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            ),
+            onValueChange = {
+                remTitle = it
+                viewModel.updateNote(
+                    parent,
+                    NoteModel(
+                        firebaseId = noteModel.firebaseId,
+                        title = remTitle,
+                        description = noteModel.description,
+                        time = noteModel.time,
+                        choosen = noteModel.choosen,
+                        done = noteModel.done,
+                        parent = noteModel.parent
+                    )
+                ) {}
+            }
+        )
+
+
+        IconButton(
+            onClick = {
+                remChos = !remChos
+                viewModel.updateNote(
+                    parent,
+                    NoteModel(
+                        firebaseId = noteModel.firebaseId,
+                        title = noteModel.title,
+                        description = noteModel.description,
+                        time = noteModel.time,
+                        choosen = remChos,
+                        done = remDone,
+                        parent = noteModel.parent
+                    )
+                ) {}
+            },
+        ) {
+            if (remChos) {
+                Icon(Icons.Outlined.Star, contentDescription = "open_menu", tint = colorResource(
+                    id = R.color.purple_200
+                ))
+            } else {
+                Icon(Icons.Filled.Star, contentDescription = "open_menu")
+            }
+        }
+
+        IconButton(
+            onClick = {
+                remChos = !remChos
+                viewModel.deleteNote(parent, noteModel) {}
+            },
+//            modifier = Modifier.padding(end = 20.dp)
+        ) {
+            Icon(painterResource(R.drawable.ic_round_close_24), contentDescription = "delete", tint = colorResource(
+                    id = R.color.purple_200))
         }
     }
 }

@@ -10,4 +10,7 @@
     <string name="new_list">Новый список</string>
     <string name="reject_title">Отменить</string>
     <string name="admit_title">Подтвердить</string>
+    <string name="add_time">Добавьте время</string>
+    <string name="add_subtask">Добавьте подзадачу</string>
+    <string name="add_name">Введите название</string>
 </resources>

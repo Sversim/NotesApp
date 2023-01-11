@@ -1,6 +1,7 @@
 package com.example.notesapp.Views
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -222,6 +223,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
         sheetElevation = 10.dp,
         sheetShape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
         sheetContent = {
+            isChoosen = pagerState.currentPage == 0
             Surface {
                 Column(
                     modifier = Modifier
@@ -301,7 +303,6 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 coroutineScope.launch {
                                     bottomSheetState.hide()
                                 }
-                                isChoosen = pagerState.currentPage == 0
                                 viewModel.createNote(
                                     if (pagerState.currentPage != 0) {
                                         pages[pagerState.currentPage].firebaseId
@@ -414,6 +415,7 @@ fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navH
             .fillMaxWidth()
             .padding(vertical = 5.dp, horizontal = 5.dp)
             .clickable {
+                Log.d("way", NavRoute.NoteScreen.route + "/${parent}/${noteModel.firebaseId}")
                 navHostController.navigate(route = NavRoute.NoteScreen.route + "/${parent}/${noteModel.firebaseId}")
             },
         elevation = 10.dp
