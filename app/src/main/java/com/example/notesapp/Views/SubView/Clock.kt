@@ -58,6 +58,7 @@ fun DatePicker(
                     onClick = onDismissRequest
                 ) {
                     Text(
+                        modifier = Modifier.padding(end = 10.dp),
                         text = stringResource(R.string.reject_title),
                         color = colorResource(R.color.white)
                     )

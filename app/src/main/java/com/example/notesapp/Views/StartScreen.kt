@@ -2,6 +2,7 @@ package com.example.notesapp.Views
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -424,6 +425,7 @@ fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navH
                 Log.d("way", NavRoute.NoteScreen.route + "/${parent}/${noteModel.firebaseId}")
                 navHostController.navigate(route = NavRoute.NoteScreen.route + "/${parent}/${noteModel.firebaseId}")
             },
+        backgroundColor =  colorResource(R.color.very_dark_grey),
         elevation = 10.dp
     ) {
         Row(
@@ -467,6 +469,13 @@ fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navH
                 Text(
                     text = noteModel.title,
                     textAlign = TextAlign.Center
+                )
+                Text(
+                    modifier = Modifier.padding(start = 10.dp),
+                    text = noteModel.time,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(id = R.color.grey),
+                    fontSize = 10.sp
                 )
             }
 
