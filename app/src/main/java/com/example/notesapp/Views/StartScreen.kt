@@ -196,11 +196,8 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             }
                         }
                         LazyColumn {
-                            items(keys.filter { !it.done }) { note ->
-                                GetCard(noteModel = note, parent = note.parent, navHostController = navHostController, viewModel = viewModel)
-                            }
-                            items(keys.filter { it.done }) { note ->
-                                GetCard(noteModel = note, parent = note.parent, navHostController = navHostController, viewModel = viewModel)
+                            items(keys.sortedBy { it.done }) { note ->
+                                GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
                             }
                         }
                     } else {
@@ -210,11 +207,6 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 items(notes.sortedBy { it.done }) { note ->
                                     GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
                                 }
-//                                listOf(false, true).forEach { bool->
-//                                    items(notes.filter { it.done == bool }) { note ->
-//                                        GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
-//                                    }
-//                                }
                             }
                         }
                     }
