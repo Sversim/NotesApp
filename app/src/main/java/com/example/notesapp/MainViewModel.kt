@@ -3,6 +3,7 @@ package com.example.notesapp
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -76,6 +77,9 @@ class MainViewModel (application: Application) : AndroidViewModel(application) {
 
     fun deleteList(listModel: ListModel, onSuccess: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
+            REPOSITORY.readAllNotes(listModel.firebaseId).value?.forEach {
+                deleteNote(listModel.firebaseId, it) {}
+            }
             REPOSITORY.deleteList(list = listModel) {
                 viewModelScope.launch(Dispatchers.Main) {
                     onSuccess()

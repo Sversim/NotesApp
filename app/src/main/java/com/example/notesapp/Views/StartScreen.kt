@@ -408,7 +408,7 @@ fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navH
             .fillMaxWidth()
             .padding(vertical = 5.dp, horizontal = 5.dp)
             .clickable {
-                navHostController.navigate(route = NavRoute.NoteScreen.route + "/${noteModel.firebaseId}")
+                navHostController.navigate(route = NavRoute.NoteScreen.route + "/${parent}/${noteModel.firebaseId}")
             },
         elevation = 10.dp
     ) {
