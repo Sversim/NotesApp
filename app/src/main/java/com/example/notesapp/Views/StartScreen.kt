@@ -197,7 +197,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         }
                         LazyColumn {
                             items(keys.sortedBy { it.done }) { note ->
-                                GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
+                                GetCard(noteModel = note, parent = note.parent, navHostController = navHostController, viewModel = viewModel)
                             }
                         }
                     } else {
@@ -216,9 +216,6 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
     }
 
 
-
-
-
     // Добавление заметки
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -232,6 +229,8 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                         .padding(all = 32.dp)
                 ) {
                     OutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         value = remTitle,
                         onValueChange = { remTitle = it },
                         label = { Text(text = stringResource(R.string.new_task)) },
@@ -239,6 +238,8 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                     )
                     if (isDescShowed) {
                         OutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth(),
                             value = remDesc,
                             onValueChange = { remDesc = it },
                             label = { Text(text = stringResource(R.string.new_deskription)) }
@@ -249,14 +250,14 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp)
+                            .height(50.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
 
                     ) {
-                        Button(
+                        IconButton(
                             modifier = Modifier
                                 .padding(top = 16.dp)
                                 .fillMaxHeight(),
-                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 isDescShowed = !isDescShowed
                             }
@@ -264,11 +265,10 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             Icon(imageVector = Icons.Filled.Edit, contentDescription = "")
                         }
 
-                        Button(
+                        IconButton(
                             modifier = Modifier
                                 .padding(top = 16.dp)
                                 .fillMaxHeight(),
-                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 isDatePickerShowed = !isDatePickerShowed
                             }
@@ -276,11 +276,10 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             Icon(imageVector = Icons.Filled.DateRange, contentDescription = "")
                         }
 
-                        Button(
+                        IconButton(
                             modifier = Modifier
                                 .padding(top = 16.dp)
                                 .fillMaxHeight(),
-                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 isChoosen = !isChoosen
                             }
@@ -294,17 +293,24 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                             }
                         }
 
-                        Button(
+                        IconButton(
                             modifier = Modifier
                                 .padding(top = 16.dp)
                                 .fillMaxHeight(),
-                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
                                 coroutineScope.launch {
                                     bottomSheetState.hide()
                                 }
+                                isChoosen = pagerState.currentPage == 0
                                 viewModel.createNote(
-                                    pages[pagerState.currentPage].firebaseId,
+                                    if (pagerState.currentPage != 0) {
+                                        pages[pagerState.currentPage].firebaseId
+                                    } else {
+                                        if (pagerState.pageCount == 1) {
+                                            viewModel.createList(ListModel(name = "Мои задачи")) {}
+                                        }
+                                        pages[1].firebaseId
+                                    },
                                     NoteModel(
                                         title = remTitle,
                                         description = remDesc,
