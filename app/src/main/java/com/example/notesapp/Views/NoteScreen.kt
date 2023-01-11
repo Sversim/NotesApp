@@ -255,7 +255,10 @@ fun NoteScreen (navHostController: NavHostController, viewModel: MainViewModel, 
                     Text(
                         modifier = Modifier
                             .clickable {
-                                viewModel.createNote(note.firebaseId, NoteModel(title = "", parent = note.firebaseId, time = "")) {}
+                                viewModel.createNote(
+                                    note.firebaseId,
+                                    NoteModel(title = "", parent = note.firebaseId, time = "")
+                                ) {}
                             }
                             .padding(start = 10.dp),
 
@@ -295,7 +298,8 @@ fun GetSubCard(noteModel: NoteModel, viewModel: MainViewModel) {
     var remDone = noteModel.done
     var remChos = noteModel.choosen
 
-    var remTitle by remember { mutableStateOf(noteModel.title) }
+    var remTitle = noteModel.title
+//    var remTitle by remember { mutableStateOf(noteModel.title) }
 
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -371,7 +375,7 @@ fun GetSubCard(noteModel: NoteModel, viewModel: MainViewModel) {
                         description = noteModel.description,
                         time = noteModel.time,
                         choosen = remChos,
-                        done = remDone,
+                        done = noteModel.done,
                         parent = noteModel.parent
                     )
                 ) {}
