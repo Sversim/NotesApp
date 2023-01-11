@@ -8,4 +8,6 @@
     <string name="rename_list">Переименовать список</string>
     <string name="delete_list">Удалить список</string>
     <string name="new_list">Новый список</string>
+    <string name="reject_title">Отменить</string>
+    <string name="admit_title">Подтвердить</string>
 </resources>

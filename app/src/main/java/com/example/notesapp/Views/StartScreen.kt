@@ -39,7 +39,9 @@ import com.google.accompanist.pager.rememberPagerState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import com.example.notesapp.Views.SubView.DatePicker
 
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -51,9 +53,11 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
     var remTitle by remember { mutableStateOf("") }
+    var remTime by remember { mutableStateOf("") }
     var remDesc by remember { mutableStateOf("") }
     var isDescShowed by remember { mutableStateOf(false) }
     var isChoosen by remember { mutableStateOf(false) }
+    var isDatePickerShowed by remember { mutableStateOf(false) }
 
     // Списки во viewPager
     val pagerState = rememberPagerState()
@@ -181,33 +185,32 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                 count = pages.size,
                 state = pagerState,
             ) { page ->
-                if (pagerState.currentPage == 0) {
-                    val keys = mutableListOf<NoteModel>()
-                    pages.forEach {
-                        if (it.firebaseId != "") {
-                            keys.addAll(
-                                viewModel.readNotesWithParent(it.firebaseId).observeAsState(listOf()).value.filter { it.choosen }
-                            )
+                Column(modifier = Modifier.fillMaxHeight()) {
+                    if (pagerState.currentPage == 0) {
+                        val keys = mutableListOf<NoteModel>()
+                        pages.forEach {
+                            if (it.firebaseId != "") {
+                                keys.addAll(
+                                    viewModel.readNotesWithParent(it.firebaseId).observeAsState(listOf()).value.filter { it.choosen }
+                                )
+                            }
                         }
-                    }
-                    LazyColumn {
-                        items(keys) { note ->
-                            GetCard(noteModel = note, parent = note.parent, navHostController = navHostController, viewModel = viewModel)
-                        }
-                    }
-                } else {
-                    val notes = viewModel.readNotesWithParent(pages[pagerState.currentPage].firebaseId).observeAsState(listOf()).value
-                    if (!notes.isNullOrEmpty()) {
                         LazyColumn {
-                            items(notes) { note ->
-                                GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
+                            items(keys) { note ->
+                                GetCard(noteModel = note, parent = note.parent, navHostController = navHostController, viewModel = viewModel)
+                            }
+                        }
+                    } else {
+                        val notes = viewModel.readNotesWithParent(pages[pagerState.currentPage].firebaseId).observeAsState(listOf()).value
+                        if (!notes.isNullOrEmpty()) {
+                            LazyColumn {
+                                items(notes) { note ->
+                                    GetCard(noteModel = note, parent = pages[pagerState.currentPage].firebaseId, navHostController = navHostController, viewModel = viewModel)
+                                }
                             }
                         }
                     }
                 }
-
-                // TODO: page content
-
             }
         }
     }
@@ -267,7 +270,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                 .fillMaxHeight(),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
                             onClick = {
-                                // TODO Выбор даты
+                                isDatePickerShowed = !isDatePickerShowed
                             }
                         ) {
                             Icon(imageVector = Icons.Filled.DateRange, contentDescription = "")
@@ -305,7 +308,7 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
                                     NoteModel(
                                         title = remTitle,
                                         description = remDesc,
-                                        // TODO внятное время
+                                        time = remTime,
                                         choosen = isChoosen,
                                         done = false,
                                         parent = pages[pagerState.currentPage].firebaseId
@@ -331,6 +334,15 @@ fun StartScreen (navHostController: NavHostController, viewModel: MainViewModel)
             }
         }
     ) {}
+
+    if (isDatePickerShowed) {
+        DatePicker(onDateSelected = {
+            remTime = it.time.toString()
+        }, onDismissRequest = {
+            isDatePickerShowed = false
+        })
+    }
+
 
 
     // Добавление списка
@@ -423,11 +435,15 @@ fun GetCard(noteModel: NoteModel, parent: String, viewModel: MainViewModel, navH
                           },
                 modifier = Modifier.padding(end = 20.dp)
             ) {
-                if (remDone) {
-                    Icon(Icons.Outlined.AddCircle, contentDescription = "open_menu")
+                val iconId = if (remDone) {
+                    R.drawable.ic_baseline_lens_24
                 } else {
-                    Icon(Icons.Filled.AddCircle, contentDescription = "open_menu")
+                    R.drawable.ic_outline_lens_24
                 }
+                Icon(
+                    painterResource(id = (iconId)),
+                    contentDescription = "open_menu"
+                    )
             }
 
             Row(
